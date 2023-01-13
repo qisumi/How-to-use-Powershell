@@ -18,8 +18,10 @@
 |                                  |                                                              |
 |          Foreach-Object          |                   对输入对象集合执行语句块                   |
 |           Sort-Object            |                     根据属性值对对象排序                     |
-|           Where-Object           |                 根据对象属性从集合中选择对象                 |
-| Select-Object | 选取对象属性的子集 |
+|           Where-Object           |                 按照语句从集合中选择（过滤）对象                 |
+| Select-Object | 以不同方式选取对象子集，或者对对象选取属性子集，也可以为对象添加计算属性 |
+| Create-Object | 创建对象 |
+| Measure-Object | 计算对象的数值属性，例如计数、度量 |
 | | |
 |        Get-Childitem(ls)         |                        查看目录下文件                        |
 |             Get-Item             |           查看该目录或文件(区别在于对于目录的处理)           |
@@ -42,5 +44,7 @@
 |  Invoke-WebRequest(curl, wget)   | 下载网络资源，执行网络请求 |
 |  |  |
 | Import-Module | 导入模块 |
-| Export-Module | 导出模块 |
+| Export-ModuleMember | 导出模块 |
+| Get-Module | 查看已导入模块 |
+| Remove-Module | 删除已导入模块 |
 
