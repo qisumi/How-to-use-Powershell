@@ -19,7 +19,8 @@
 |          Foreach-Object          |                   对输入对象集合执行语句块                   |
 |           Sort-Object            |                     根据属性值对对象排序                     |
 |           Where-Object           |                 根据对象属性从集合中选择对象                 |
-|                                  |                                                              |
+| Select-Object | 选取对象属性的子集 |
+| | |
 |        Get-Childitem(ls)         |                        查看目录下文件                        |
 |             Get-Item             |           查看该目录或文件(区别在于对于目录的处理)           |
 |        Get-Location(pwd)         |                         查看当前目录                         |
