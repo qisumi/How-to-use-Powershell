@@ -265,6 +265,7 @@ $a = @(2,4,6)          # result is array of 3
 2. 函数
 3. cmdlet
 4. 外部命令
+5. `{}`包裹的合法PowerShell语句
 
 对于重名的命令，也按照上述顺序（优先级）进行查找。
 
@@ -610,3 +611,284 @@ $hash.GetEnumerator() | Sort-Object -Property key
 $h1 += $h2
 $h1 = $h1 + $h2
 ```
+
+## 函数
+
+### 函数定义
+
+PowerShell的函数支持管道，还需要提供一些文档（用来响应Get-Help），还可以支持参数名在PowerShell中的自动补全。所以完整的函数定义是非常复杂的（幸运的是这些都是可选的），我们将逐步的介绍函数的定义规则。一个最简单的函数可以这样定义：
+
+```powershell
+# 包含关键字、函数名、参数列表、默认参数和类型定义、返回值的函数
+function Get-Power ([long]$base, [int]$exponent = 2) {
+    # body
+    return $result
+}
+```
+
+### 函数属性
+
+可以在函数声明时指定一些属性
+
+```powershell
+# 该函数在Get-Help中将显示一些帮助信息
+[Help('text')]
+function Get-Power ([long]$base, [int]$exponent = 2) {}
+```
+
+
+
+### 筛选器函数
+
+普通函数在管道中运行一次，并通过 `$input` 访问输入集合，而 filter 是一种特殊类型的函数，它针对输入集合中的每个对象执行一次。 当前正在处理的对象可通过变量 `$_` 获取。
+
+```powershell
+filter Get-Square2 { # make the function a filter
+    $_ * $_ # access current object from the collection
+}
+-3..3 | Get-Square2 # collection has 7 elements
+```
+
+### 参数绑定
+
+参数绑定按如下顺序进行
+
+1. 对所有指定参数名的参数赋值
+
+   > 在没有歧义的情况下，允许使用参数的前若干个字母作为缩写，只需要满足该缩写不是参数的公共前缀即可。
+
+2. 按照剩余的实参和形参顺序一一赋值
+
+3. 如果还有剩余参数，全部放入`$args`变量（如果设置了对应的参数属性）
+
+4. 如果参数不足够，从管道中绑定。
+
+### `switch`类型的参数
+
+`switch`又被称为开关参数，它的值仅有 `$true` `$false`两种。默认值为`$false`。调用时只需要输入对应的参数名，就可以将其设置为`$true`。
+
+
+
+### 参数属性
+
+在参数定义时可以指定一些属性。例如：
+
+```powershell
+param (
+    [Parameter(HelpMessage = "some text")]
+    [Alias("CN")]
+    [Alias("name", "system")]
+    [string[]] $ComputerName
+)
+```
+
+上述参数定义完成了：
+
+1. 设置在`Get-Help`页面中，该参数会显示帮助信息
+2. 拥有三个参数别名
+3. 类型为`string[]`
+
+常见的属性及描述如下表：
+
+|                        属性                        |                             描述                             |
+| :------------------------------------------------: | :----------------------------------------------------------: |
+|                   Alias: string                    |                           参数别名                           |
+|                AllowEmptyCollection                |                         允许为空集合                         |
+|                  AllowEmptyString                  |                        允许为空字符串                        |
+|                     AllowNull                      |                        允许为`$null`                         |
+|                  Paramter: object                  |                         定义形参特征                         |
+|               ValidateCount: object                |               定义接受参数数组的最小和最大个数               |
+|               ValidateNotNullOrEmpty               |  定义参数不能为空字符串、空数组、`$null`或者包含他们的集合   |
+|               PSDefaultValue: object               |                     包含帮助信息和默认值                     |
+|           ValidatePattern: regex_string            |                       验证模式是否匹配                       |
+|               ValidateRange: object                |                     验证参数最小、最大值                     |
+|               ValidateScript: 表达式               |               使用逻辑表达式对参数进行复杂验证               |
+|                ValidateSet: object                 |                 验证参数是否是某个集合中的值                 |
+|            （prama块属性）CmdletBinding            | 此属性在函数的“参数块”的“属性列表”中用于指示该函数的行为类似于 cmdlet 具体来说，它可以让函数使用它可让函数使用 `begin`、`process`和 `end` 命名块通过 `$PsCmdlet` 变量来访问大量方法和属性。但是定义这个属性之后，`$args`将不会接受多于参数。 |
+| （prama块属性）OutputType: object(type[],string[]) |             指定返回值的类型、返回类型参数集名称             |
+|                       [type]                       |                         定义参数类型                         |
+
+|             Parameter参数             |                             描述                             |
+| :-----------------------------------: | :----------------------------------------------------------: |
+|          HelpMessage: string          | 如未提供所需参数，运行时会提示用户输入参数值。 提示对话框包含 HelpMessage 文本。(如果设置了`Mandatory=$true`) |
+|            Mandatory: bool            |       如果未提供该参数，要求PowerShell请求用户手动输入       |
+|       ParameterSetName: string        |                    指定参数所属参数集名称                    |
+|             Position: int             |     指定位置，从0开始。如果没有指定则必须指定名称或别名      |
+|        ValueFromPipeline: bool        | 是否接受来自管道对象的输入并将对象作为唯一参数，当且仅当参数集内只有一个参数时可以设置为`$true` |
+| ValueFromPipelineByPropertyName: bool |  是否接受来自管道对象的输入，且从管道对象的属性名来接受参数  |
+|   ValueFromRemainingArguments: bool   |                 是否使用`$args`接受多余参数                  |
+
+| PSDefaultValue参数 |           描述           |
+| :----------------: | :----------------------: |
+|    Help: string    | 在Get-Help中显示帮助信息 |
+|   Value: object    |      指定参数默认值      |
+
+|    ValidateCount参数    |   描述   |
+| :---------------------: | :------: |
+| MinLength:int（位置 0） | 最小数目 |
+| MaxLength:int（位置 1） | 最大数目 |
+
+|   ValidateRange参数    |  描述  |
+| :--------------------: | :----: |
+| MinRange:int（位置 0） | 最小值 |
+| MaxRange:int（位置 1） | 最大值 |
+
+|    ValidateSet参数     |                             用途                             |
+| :--------------------: | :----------------------------------------------------------: |
+| ValidValues（位置 0）  |                   类型：string[]有效值集。                   |
+| IgnoreCase（命名参数） | 类型：bool；默认值：$true指定是否应忽略字符串类型的参数的大小写。 |
+
+### 参数集
+
+可编写能够针对不同方案执行不同操作的单个函数或 cmdlet。 方法是根据所需执行的操作公开相应的参数组。 此类参数分组称为“参数集”。
+
+参数属性`Prameter.ParameterSetName`指定形参所属的参数集。 此行为意味着每个参数集必须具有一个唯一参数，且该参数不存在于任何其他参数集中。
+
+对于属于多个参数集的参数，请为每个参数集添加 `Parameter` 属性。 这将允许以不同方式定义每个参数集中的参数。包含多个位置参数的参数集必须为每个参数定义唯一位置。 两个位置参数不能指定同一位置。如果某个参数未指定有参数集，则该参数属于所有参数集。
+
+```powershell
+# 定义了两个参数集 Computer 和 User，参数SharedParam同时属于两个参数集
+param ( [Parameter(Mandatory = $true，
+ParameterSetName = "Computer")]
+[string[]] $ComputerName，
+
+[Parameter(Mandatory = $true，
+ParameterSetName = "User")]
+[string[]] $UserName，
+
+[Parameter(Mandatory = $true，
+ParameterSetName = "Computer")]
+[Parameter(ParameterSetName = "User")]
+[int] $SharedParam = 5 )
+
+if ($PsCmdlet.ParameterSetName -eq "Computer")
+{
+	#处理Computer
+}
+
+elseif ($PsCmdlet.ParameterSetName -eq "User")
+{
+	# 处理User
+}
+```
+
+### 从管道获得参数
+
+使用`$input`可以从管道中获得参数，如下例子：
+
+```powershell
+function Get-Square1 {
+    foreach ($i in $input) {   # iterate over the collection
+        $i * $i
+    }
+}
+-3..3 | Get-Square1
+```
+
+### 生命周期块
+
+如果函数从管道中获得参数，并且开启了`CmdletBinding`属性，我们可以使用一些块来在其不同的生命周期执行代码。他们包括
+
+1. `begin`
+2. `process`
+3. `end`
+
+```powershell
+function Get-Square1 {
+		begin{
+			echo "Begin"
+		}
+		process{
+      $_ = $_ * $_
+		}
+		
+		foreach ($i in $input) {   # iterate over the collection
+        echo $i
+    }
+    
+    end{
+    	echo "End"
+    }
+}
+```
+
+### 定义参数的另一种方式-Param块和DynamicParam块
+
+示例代码展示了使用方法，首先定义两个静态参数，如果`$str`参数满足条件，`QI`参数及其默认值才是可用的。
+
+```powershell
+function fun {
+    param ([string]$str, [int]$start_pos = 0);
+    DynamicParam{
+    	if($srt -eq "*Qisumi"){
+    		$paramDictionary.Add("QI",$Default)
+    		return $paramDictionary
+    	}
+    }
+}
+```
+
+### Param块属性 OutputType
+
+|        参数        |        描述        |
+| :----------------: | :----------------: |
+|  位置0：string[]   | 返回的值类型的列表 |
+| 其余部分：string[] |                    |
+
+```powershell
+[OutputType([int])] param ( ... )
+[OutputType("double")] param ( ... )
+[OutputType("string","string")] param ( ... )
+```
+
+### 部分只允许在工作流中使用的块
+
+它们包括`parallel sequence inlinescipt`，参考[工作流](https://learn.microsoft.com/zh-cn/powershell/scripting/lang-spec/chapter-08?view=powershell-7.2#8102-workflow-functions)。
+
+## 基于注释的帮助
+
+PowerShell 为程序员提供了一种机制，可以使用特殊的注释指令来记录其脚本。 使用此类语法的注释称为帮助注释`Get-Help`从这些指令生成文档。
+
+### 简介
+
+帮助注释包含格式为 .name 的帮助指令，后跟一行或多行帮助内容文本 。
+
+帮助主题中的所有行都必须是连续的。 如果帮助主题前面的注释不属于该主题，则两者之间必须至少有一个空白行。指令可以按任意顺序显示，并且某些指令可能会多次出现。记录函数时，帮助主题可能出现在以下三个位置之一：
+
+- 紧接在函数定义之前，在函数帮助的最后一行与包含函数语句的行之间不超过一个空白行。
+- 紧接在左大括号之后的函数体内。
+- 紧接在右大括号之前的函数体内。
+
+记录脚本文件时，帮助主题可能出现在以下两个位置之一：
+
+- 在脚本文件的开头，可以只在前面加上注释和空白行。 如果帮助后脚本的第一项是函数定义，则脚本帮助的末尾和该函数声明之间必须至少有两个空白行。 否则，帮助将被解释为应用于函数而非脚本文件。
+- 在脚本文件的末尾。
+
+```powershell
+<#
+<help-directive-1>
+<help-content-1>
+...
+
+<help-directive-n>
+<help-content-n>
+#>
+<#
+.DESCRIPTION
+Computes Base to the power Exponent. Supports non-negative integer
+powers only.
+#>
+```
+
+### 帮助命令
+
+|          命令名           |                             描述                             |
+| :-----------------------: | :----------------------------------------------------------: |
+|       .DESCRIPTION        |                    详细描述，只能使用一次                    |
+|         .SYNOPSIS         |                    简要描述，只能使用一次                    |
+|         .EXAMPLE          |                           用法示例                           |
+|          .INPUTS          |                描述管道传输到脚本或函数的对象                |
+|           .LINK           | 指定一个http(s)起始的URL，使用Get-Help -Online时会打开这个页面 |
+|          .NOTES           |                  其他帮助信息，只能使用一次                  |
+|         .OUTPUTS          |                         描述输出对象                         |
+| .PARAMETER Parameter-Name |                         描述给定参数                         |
