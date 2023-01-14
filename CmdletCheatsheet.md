@@ -22,9 +22,7 @@
 | Select-Object | 以不同方式选取对象子集，或者对对象选取属性子集，也可以为对象添加计算属性 |
 | Create-Object | 创建对象 |
 | Measure-Object | 计算对象的数值属性，例如计数、度量 |
-| | |
-|        Get-Childitem(ls)         |                        查看目录下文件                        |
-|             Get-Item             |           查看该目录或文件(区别在于对于目录的处理)           |
+|                                  |                                                              |
 |        Get-Location(pwd)         |                         查看当前目录                         |
 |         Get-Location(cd)         |                         进入指定目录                         |
 |                                  |                                                              |
@@ -33,6 +31,8 @@
 |         Get-Content(cat)         |                         读取文件内容                         |
 |         Set-Content(sc)          |                         覆盖文件内容                         |
 |                                  |                                                              |
+| Get-Childitem(ls) | 查看目录下文件 |
+| Get-Item | 查看该目录或文件(区别在于对于目录的处理) |
 |      New-Item(mkdir, touch)      |                        创建文件或目录                        |
 |          Copy-Item(cp)           |                        复制文件或目录                        |
 |         Remove-Item(rm)          |                        删除文件或目录                        |

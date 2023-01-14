@@ -1,4 +1,165 @@
-# How to use Powershell
+# Getting Started
+
+## 安装和下载
+
+PowerShell3.0集成在了所有的Windows10以上系统中。该文档也是基于Powershell3.0的。但仍然建议安装
+
+- [Windows 终端安装 | Microsoft Learn](https://learn.microsoft.com/zh-cn/windows/terminal/install)
+- [在 Windows 上安装 PowerShell - PowerShell | Microsoft Learn](https://learn.microsoft.com/zh-cn/powershell/scripting/install/installing-powershell-on-windows?WT.mc_id=THOMASMAURER-blog-thmaure&view=powershell-7.2)
+
+虽然最新的PS已经到达了7.x版本，但是不用担心，因为某种原因，他和PS3.0的差别并不是很大。
+
+> 一个有趣的事情：大多数情况下，软件版本号的管理遵循[semver语义化版本表达](https://semver.org/lang/zh-CN/)。简要来说，一个版本号的格式为`X.Y.Z`。他们分别表示
+>
+> 1. 主版本号：当你做了不兼容的 API 修改，
+> 2. 次版本号：当你做了向下兼容的功能性新增，
+> 3. 修订号：当你做了向下兼容的问题修正。
+>
+> 而主版本号，往往就会体现在软件名上。例如`Python2`和`Python3`并不兼容，所以造成了事实上的社区分裂，他们已经变成了两个语言。
+>
+> 由于这样的原因，软件主版本号的变更实际上非常罕见。例如`numpy`在2006年发布`v1.0.0`，直到现在，主版本号仍然没有变化，为`1.24.1`（2023年）。
+>
+> 然而事情总不是一成不变的，有竞争就会有内卷。Chrome带来了“按照时间发布版本”的习惯。不论功能变化如何，每个固定的时间就会发布新的版本。用户潜意识会认为主版本号变化带来了非常多的功能改进，就更愿意升级。于是现在很多大公司的项目也有类似的行为（包括PS）。Chrome的大版本号已经达到了`105`.
+
+## 像在Linux中一样使用命令
+
+就像在Linux中一样，你可以使用诸如`cd` `ls` `mkdir` `cat`等命令进行基本操作，但是并非所有的Linux指令都在PS中得到支持。如下图：PS中的命令往往返回一个二维表格。这与Linux中`ls -l`的行为类似，但是有本质的不同。Linux的命令行是基于文本的，而PS中的命令行是基于对象的。在Linux中，任何命令的输出都是基于文本的，根据对字符串的处理，我们可以做到对命令输出的处理，例如检索、行计数、过滤等等。但是这在某种角度上是低效的，因为数据在不同指令和程序之间流动需要解析字符串来转换格式。
+
+<img src="HowToUsePowerShell.assets/image-20230114090958229.png" alt="image-20230114090958229" style="zoom:50%;" />
+
+## 命令的基本形式 Cmdlet
+
+在Linux中往往使用缩写作为命令的名称，例如`mkdir = make directory` `cd = change directory`。这个是一个充满geek风格的行为，但是也有一些历史遗留的原因。那个时候的终端还不支持自动补全等功能。在PowerShell中，一般使用成为`Cmdlet`的命令，他的格式为**动词-名词**，例如`Get-Help` `Write-Output`.这样做的好处是，对于初学者来说很容易了解命令的含义，缺点是比较冗长，但这不是问题，因为在PowerShell中由良好的自动补全功能（使用`Tab`键）。
+
+在[Cmdlet Cheatsheet](./CmdletCheatsheet.md)中记录了一些常用的Cmdlet和对应的功能描述。
+
+## 命令的别名
+
+实际上`mkdir`等Linux命令在PS的支持是通过别名来实现的，我们可以给一个很长的命令起一个别名。使用   `*-Alias`系列命令可以查看、增加、修改和删除别名。
+
+## 使用Get-Help和Get-Command命令
+
+`Get-Help`是最重要的命令，因为他可以帮助我们获得一个命令的帮助。一般我们使用这两种命令。
+
+```powershell
+# 获得基本帮助，会输出下图信息
+Get-Help Set-Location
+
+# 查看使用例子，在下一小节展示
+Get-Help Set-Location -Example
+```
+
+<img src="HowToUsePowerShell.assets/image-20230114133001899.png" alt="image-20230114133001899" style="zoom:50%;" />
+
+`Get-Command`命令用来帮助我们发现我们可能需要但还不知道的命令。由于Cmdlet的特殊形式，我们可能会启发式的猜测我们所需要命令的名字。例如我们知道`Set-Location`相当于`cd`，那么`pwd`命令应当可能是`Get-Location`。不论如何，他至少应该是`*-Location`的形式，那么我们查找一并获得如下输出下。
+
+```powershell
+Get-Command *-Location
+
+CommandType     Name                       Version    Source
+-----------     ----                       -------    ------
+Cmdlet          Get-Location               7.0.0.0    Microsoft.PowerShell.Management
+Cmdlet          Pop-Location               7.0.0.0    Microsoft.PowerShell.Management
+Cmdlet          Push-Location              7.0.0.0    Microsoft.PowerShell.Management
+Cmdlet          Set-Location               7.0.0.0    Microsoft.PowerShell.Management
+```
+
+不难猜测`Get-Location`是我们所需要的命令，那他具体如何使用的？使用`Get-Help`。
+
+```powershell
+Get-Help Get-Location -Example
+```
+
+![image-20230114133726298](HowToUsePowerShell.assets/image-20230114133726298.png)
+
+这样我们就知道了这条命令使用的基本方法（这里有很多例子，但我只截图了最简单的一个）。
+
+## 按顺序运行多个命令
+
+使用`;`分割多个命令
+
+## 使用管道组合多个命令
+
+多个使用`|`分割的命令序列称为管道，管道从上一条命令获得输出，并作为输入传输给下一条命令。下面有一个例子。这个例子中首先使用`Get-Location`获得当前路径对象，通过管道传输给`ls`命令。
+
+```powershell
+Get-Location | ls
+```
+
+![image-20230114134323256](HowToUsePowerShell.assets/image-20230114134323256.png)
+
+## Powershell基于对象
+
+从之前的图中我们不难看出，大多数命令的输出都是二维表格的形式，实际上这是一系列对象。表格的表头是对象的属性。对于`ls`的输出可以这样理解。`ls`输出一系列**文件对象**。这些对象拥有(`Mode, LastWriteTime, Length Name`)这些**属性**。在管道中传输的也是对象。这样做的好处是数据在传输到下一条命令时可以提前校验格式，还可以避免解析字符串带来的性能开销。
+
+## Powershell大小写不敏感
+
+Powershell中所有的**关键字、命令**都是大小写不敏感的。
+
+## 输入输出重定向
+
+Powershell支持输出重定向运算符`>` `>>`。但是不支持输入重定向。但是我们总是可以使用 `Get-Content |`来代替输入重定向，即先获取文件的内容，再通过管道传输给下一条命令。
+
+## 对输出进行处理
+
+我们现在已经知道，PS是基于对象的。那么在这种情况下，我们对输出进行处理，往往使用`*-Object`系列命令。如下有几个简单的例子。
+
+```powershell
+# 给输出按照修改时间属性排序
+ls | Sort-Object -Property LastWriteTime
+# 给输出去重
+ls | Sort-Object -Unique
+
+# 按照条件过滤输出，这里选择Length属性大于100的
+ls | Where-Object -Property Length -ge 100
+
+# 查看输出了多少条记录, 相当于Linux中的 wc -l
+ls | Measure-Object
+```
+
+## 使用脚本
+
+PS脚本以`.ps1`为后缀，PS脚本的写法除了可以使用PS命令之外，和正常的编程语言大致相同。可以参考**Docs**部分详细了解。这里介绍一些最简单的特征。
+
+### 使用方法
+
+在PS中先输入`Set-ExecutionPolicy Unrestricted`之后，就开启了使用脚本的权限。然后使用脚本的路径来调用脚本。
+
+### 变量
+
+PS中的变量必须以`$`开头，可以赋值为整数、浮点数、字符串等。字符串使用`'`或`"`包裹。
+
+### 特殊结构
+
+PS中的变量还可以是**数组、哈希表、对象**。具体的使用方法查看**Docs**部分对应章节。
+
+### 函数
+
+PS中可以定义函数，PS中函数的定义可以很复杂，也可以很简单。具体的使用方法查看**Docs**部分对应章节。
+
+### 流程控制
+
+PS中支持`if else elseif` `switch case default` `while for foreach`  `do while` `break continue` `try catch throw`这些在其他语言中也很常用的关键字，用法大致相同。有些许不同的地方主要在`break continue` 查看**Doc/语句/标记语句**小节进行详细了解。
+
+### 运算符
+
+PS中的数值运算符、赋值和其他语言类似，包括`+ - * / += -= *= /= ++ -- = ()` 。但是其他运算符都使用了非符号表示，这样做的好处是可以简化解析，并且可以定义大量的运算符而不用担心特殊符号被用完。这些运算符统一使用 `-name`表示。例如相等`==`用`-eq`表示。所以`if`语句往往是`if($a -gt 10)`的形式，这里表达的是**如果$a变量大于10**.详细的运算符参见**Docs/运算符**章节。这里列出一些常用的运算符。
+
+1. `eq -> equal` 等于
+
+2. `ne -> not equal` 不等于
+
+3. `gt -> greater than`大于
+
+4. `lt -> less then` 小于
+
+5. `ge -> great equal`大于等于
+
+6. `le -> less equal` 小于等于
+
+7. `AND` `OR` `NOT` `XOR` 逻辑运算符
+
+# Docs
 
 ## 基本概念
 
