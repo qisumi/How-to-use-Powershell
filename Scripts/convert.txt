@@ -1,0 +1,17 @@
+任务，一个支持以下参数的程序，批量的将一个目录下的压缩文件解压，并且使用该程序处理。
+
+  OPTIONS:
+
+      -h, --help                        HELP MENU
+      这些参数表示转换数据的含义，选项之间互斥
+        --tec                             转换TEC数据
+        --zc                              转换中层数据
+        --gc                              转换高层数据
+        --foE                             转换重测仪数据
+        --foF2                            转换重测仪数据
+      这些参数表示输入和输出文件的路径，是必需的选项
+        --input_dir=[INPUT]               输入文件路径
+        --output_dir=[OUTPUT]             输出文件路径
+
+    Developed by CILab 2022-08-28. Version: 0.0.1
+	********Help Message*********

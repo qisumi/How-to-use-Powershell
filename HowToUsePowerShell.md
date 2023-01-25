@@ -25,7 +25,7 @@ PowerShell3.0集成在了所有的Windows10以上系统中。该文档也是基�
 
 就像在Linux中一样，你可以使用诸如`cd` `ls` `mkdir` `cat`等命令进行基本操作，但是并非所有的Linux指令都在PS中得到支持。如下图：PS中的命令往往返回一个二维表格。这与Linux中`ls -l`的行为类似，但是有本质的不同。Linux的命令行是基于文本的，而PS中的命令行是基于对象的。在Linux中，任何命令的输出都是基于文本的，根据对字符串的处理，我们可以做到对命令输出的处理，例如检索、行计数、过滤等等。但是这在某种角度上是低效的，因为数据在不同指令和程序之间流动需要解析字符串来转换格式。
 
-<img src="HowToUsePowerShell.assets/image-20230114090958229.png" alt="image-20230114090958229" style="zoom:50%;" />
+<img src="http://blogoss.qisumi.cn/image-20230114090958229.png" style="zoom:50%;" />
 
 ## 命令的基本形式 Cmdlet
 
@@ -49,7 +49,7 @@ Get-Help Set-Location
 Get-Help Set-Location -Example
 ```
 
-<img src="HowToUsePowerShell.assets/image-20230114133001899.png" alt="image-20230114133001899" style="zoom:50%;" />
+<img src="http://blogoss.qisumi.cn/image-20230114133001899.png" style="zoom:50%;" />
 
 `Get-Command`命令用来帮助我们发现我们可能需要但还不知道的命令。由于Cmdlet的特殊形式，我们可能会启发式的猜测我们所需要命令的名字。例如我们知道`Set-Location`相当于`cd`，那么`pwd`命令应当可能是`Get-Location`。不论如何，他至少应该是`*-Location`的形式，那么我们查找一并获得如下输出下。
 
@@ -70,7 +70,7 @@ Cmdlet          Set-Location               7.0.0.0    Microsoft.PowerShell.Manag
 Get-Help Get-Location -Example
 ```
 
-![image-20230114133726298](HowToUsePowerShell.assets/image-20230114133726298.png)
+<img src="http://blogoss.qisumi.cn/image-20230114133708722.png" style="zoom: 67%;" />
 
 这样我们就知道了这条命令使用的基本方法（这里有很多例子，但我只截图了最简单的一个）。
 
@@ -86,7 +86,7 @@ Get-Help Get-Location -Example
 Get-Location | ls
 ```
 
-![image-20230114134323256](HowToUsePowerShell.assets/image-20230114134323256.png)
+![](http://blogoss.qisumi.cn/image-20230114134323256.png)
 
 ## Powershell基于对象
 
